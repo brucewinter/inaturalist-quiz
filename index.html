@@ -557,6 +557,7 @@
     // Result panel
     const panel = document.getElementById('result-panel');
     panel.style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     document.getElementById('result-icon').textContent = isCorrect ? '✅' : '❌';
     document.getElementById('result-text').textContent = isCorrect
       ? 'Correct!'
