@@ -345,6 +345,13 @@
     </div>
     <div class="question-label" id="question-label">Question 1</div>
 
+    <div id="result-panel">
+      <div id="result-icon"></div>
+      <div id="result-text"></div>
+      <div id="result-detail"></div>
+      <button id="next-btn" onclick="nextQuestion()">Next →</button>
+    </div>
+
     <div class="photo-container">
       <img id="obs-photo" src="" alt="Observation photo">
       <div class="photo-meta">
@@ -356,13 +363,6 @@
     <div class="question-text" id="question-text">What is this organism?</div>
 
     <div class="options-grid" id="options-grid"></div>
-
-    <div id="result-panel">
-      <div id="result-icon"></div>
-      <div id="result-text"></div>
-      <div id="result-detail"></div>
-      <button id="next-btn" onclick="nextQuestion()">Next →</button>
-    </div>
   </div>
 
   <div id="end-screen">
@@ -557,7 +557,6 @@
     // Result panel
     const panel = document.getElementById('result-panel');
     panel.style.display = 'flex';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     document.getElementById('result-icon').textContent = isCorrect ? '✅' : '❌';
     document.getElementById('result-text').textContent = isCorrect
       ? 'Correct!'
