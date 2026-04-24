@@ -249,6 +249,47 @@
 
     #result-detail a:hover { text-decoration: underline; }
 
+    /* Comparison cards (wrong answer) */
+    .comparison {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .comp-card {
+      flex: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      font-size: 0.82rem;
+    }
+
+    .comp-card.wrong  { border-color: var(--red); }
+    .comp-card.right  { border-color: var(--green); }
+
+    .comp-card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
+
+    .comp-info { padding: 8px 10px; line-height: 1.4; }
+
+    .comp-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .comp-card.wrong .comp-label { color: var(--red); }
+    .comp-card.right .comp-label { color: var(--green); }
+
+    .comp-common { font-weight: 600; }
+    .comp-sci { font-style: italic; opacity: 0.65; font-size: 0.76rem; }
+
     #next-btn {
       background: var(--accent);
       color: #0f1a0f;
@@ -352,6 +393,7 @@
     <div id="result-panel">
       <div id="result-icon"></div>
       <div id="result-text"></div>
+      <div id="comparison"></div>
       <div id="result-detail"></div>
       <button id="next-btn" onclick="nextQuestion()">Next →</button>
     </div>
@@ -535,7 +577,7 @@
       btn.innerHTML = displayName + (quizMode === 'common' && sciName !== displayName
         ? `<span class="sci-name">${sciName}</span>` : '');
       btn.dataset.name = displayName;
-      btn.addEventListener('click', () => handleAnswer(btn, displayName, correctName, obs));
+      btn.addEventListener('click', () => handleAnswer(btn, opt, obs));
       grid.appendChild(btn);
     });
 
@@ -544,10 +586,12 @@
     updateScoreDisplay();
   }
 
-  function handleAnswer(clickedBtn, chosen, correct, obs) {
+  function handleAnswer(clickedBtn, guessedObs, correctObs) {
     if (answered) return;
     answered = true;
 
+    const chosen = getName(guessedObs);
+    const correct = getName(correctObs);
     const isCorrect = chosen === correct;
     if (isCorrect) score++;
 
@@ -562,14 +606,31 @@
     const panel = document.getElementById('result-panel');
     panel.style.display = 'flex';
     document.getElementById('result-icon').textContent = isCorrect ? '✅' : '❌';
-    document.getElementById('result-text').textContent = isCorrect
-      ? 'Correct!'
-      : `The answer was: ${correct}`;
+    document.getElementById('result-text').textContent = isCorrect ? 'Correct!' : 'Not quite!';
 
-    const sciLine = obs.taxon.name !== correct ? `<em>${obs.taxon.name}</em> · ` : '';
-    const wikiUrl = obs.taxon.wikipedia_url || `https://en.wikipedia.org/wiki/${obs.taxon.name.replace(/ /g, '_')}`;
+    // Comparison (wrong answers only)
+    const cmp = document.getElementById('comparison');
+    if (!isCorrect) {
+      const compCard = (obs, cls, label) => `
+        <div class="comp-card ${cls}">
+          <img src="${getPhotoUrl(obs)}" alt="">
+          <div class="comp-info">
+            <div class="comp-label">${label}</div>
+            <div class="comp-common">${getName(obs)}</div>
+            <div class="comp-sci">${obs.taxon.name}</div>
+          </div>
+        </div>`;
+      cmp.innerHTML = `<div class="comparison">
+        ${compCard(guessedObs, 'wrong', 'Your guess')}
+        ${compCard(correctObs, 'right', 'Correct answer')}
+      </div>`;
+    } else {
+      cmp.innerHTML = '';
+    }
+
+    const wikiUrl = correctObs.taxon.wikipedia_url || `https://en.wikipedia.org/wiki/${correctObs.taxon.name.replace(/ /g, '_')}`;
     document.getElementById('result-detail').innerHTML =
-      `${sciLine}<a href="${wikiUrl}" target="_blank">Wikipedia</a> · <a href="https://www.inaturalist.org/observations/${obs.id}" target="_blank">iNaturalist →</a>`;
+      `<a href="${wikiUrl}" target="_blank">Wikipedia</a> · <a href="https://www.inaturalist.org/observations/${correctObs.id}" target="_blank">iNaturalist →</a>`;
 
     updateScoreDisplay();
   }
